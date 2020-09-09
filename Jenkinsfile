@@ -113,6 +113,12 @@ pipeline {
             steps{
                 withSonarQubeEnv('M2mobi') {
                     sh "sonar-scanner -Dsonar.projectKey=php:lunr -Dsonar.sources=src/ -Dsonar.php.tests.reportPath=build/logs/junit.xml -Dsonar.php.coverage.reportPaths=build/logs/clover.xml"
+                    sh 'curl -u $SONAR_AUTH_TOKEN: $SONAR_HOST_URL/api/issues/search?componentKeys=php:lunr | jq "{\"version\":\"7.6\",\"users\":[],\"issues\":[.issues[]|{\"creationDate\":.creationDate,\"isNew\":true,\"status\":\"OPEN\",\"rule\":.rule,\"severity\":.severity,\"key\":.key,\"component\":.component,\"line\":.textRange|.startLine,\"startLine\":.textRange|.startLine,\"startOffset\":.textRange|.startOffset,\"endLine\":.textRange|.endLine,\"endOffset\":.textRange|.endOffset,\"message\":.message}],\"components\":[.components[]|if.qualifier==\"TRK\"then{\"key\":.key}else{\"status\":\"CHANGED\",\"moduleKey\":.key|split(\":src\")[0],\"path\":.path,\"key\":.key}end]}" > build/logs/sonar-report.json'
+                }
+            }
+            post {
+                always {
+                    recordIssues enabledForFailure: true, tool: sonarQube(pattern: 'build/logs/sonar-report.json')
                 }
             }
         }

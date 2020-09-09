@@ -1,12 +1,13 @@
 #!/bin/bash
 
 SONAR_TMP=$(mktemp -d -t sonar-XXXXXXXXXX)
+PROJECT="$1"
 
 PAGE=1
 FETCHED=0
 
 while [ "$FETCHED" = 0 ]; do
-curl -s -u $SONAR_AUTH_TOKEN: $SONAR_HOST_URL/api/issues/search?componentKeys=php:lunr\&p=$PAGE > $SONAR_TMP/sonar-p$PAGE.json
+curl -s -u $SONAR_AUTH_TOKEN: $SONAR_HOST_URL/api/issues/search?componentKeys=$PROJECT\&p=$PAGE > $SONAR_TMP/sonar-p$PAGE.json
 
 SONAR_P=$(jq '.p' $SONAR_TMP/sonar-p$PAGE.json)
 SONAR_PS=$(jq '.ps' $SONAR_TMP/sonar-p$PAGE.json)

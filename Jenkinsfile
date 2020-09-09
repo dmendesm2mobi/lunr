@@ -110,7 +110,7 @@ pipeline {
             steps{
                 withSonarQubeEnv('M2mobi') {
                     sh "sonar-scanner -Dsonar.projectKey=php:lunr -Dsonar.sources=src/ -Dsonar.php.tests.reportPath=build/logs/junit.xml -Dsonar.php.coverage.reportPaths=build/logs/clover.xml"
-                    sh './tests/get-sonar-report.sh'
+                    sh './tests/get-sonar-report.sh php:lunr'
                 }
             }
             post {

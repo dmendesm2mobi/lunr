@@ -107,9 +107,6 @@ pipeline {
         }
 
         stage('SonarQube Analysis'){
-            when {
-                branch 'master'
-            }
             steps{
                 withSonarQubeEnv('M2mobi') {
                     sh "sonar-scanner -Dsonar.projectKey=php:lunr -Dsonar.sources=src/ -Dsonar.php.tests.reportPath=build/logs/junit.xml -Dsonar.php.coverage.reportPaths=build/logs/clover.xml"

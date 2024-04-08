@@ -29,16 +29,16 @@ abstract class L10nTest extends LunrBaseTest
     protected $logger;
 
     /**
-     * Mock instance of a FilesystemAccessObject class.
-     * @var FilesystemAccessObjectInterface
-     */
-    protected $fao;
-
-    /**
      * Array of supported languages.
      * @var array
      */
     protected $languages;
+
+    /**
+     * Instance of the tested class.
+     * @var L10n
+     */
+    protected L10n $class;
 
     /**
      * TestCase Constructor.
@@ -46,13 +46,12 @@ abstract class L10nTest extends LunrBaseTest
     public function setUp(): void
     {
         $this->logger = $this->getMockBuilder('Psr\Log\LoggerInterface')->getMock();
-        $this->fao    = $this->getMockBuilder('Lunr\Ray\FilesystemAccessObjectInterface')->getMock();
 
-        $this->class = new L10n($this->logger, $this->fao);
-
-        $this->reflection = new ReflectionClass('Lunr\L10n\L10n');
+        $this->class = new L10n($this->logger, TEST_STATICS . '/l10n/');
 
         $this->languages = [ 'de_DE', 'en_US', 'nl_NL' ];
+
+        parent::baseSetUp($this->class);
     }
 
     /**
@@ -61,10 +60,10 @@ abstract class L10nTest extends LunrBaseTest
     public function tearDown(): void
     {
         unset($this->logger);
-        unset($this->fao);
         unset($this->class);
-        unset($this->reflection);
         unset($this->languages);
+
+        parent::tearDown();
     }
 
     /**

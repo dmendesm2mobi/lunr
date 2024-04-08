@@ -18,10 +18,8 @@ use Psr\Log\LoggerInterface;
 /**
  * Abstract Localization Provider class
  */
-abstract class L10nProvider
+abstract class L10nProvider extends AbstractL10n
 {
-
-    use L10nTrait;
 
     /**
      * The language the provider has been initialized with
@@ -38,18 +36,17 @@ abstract class L10nProvider
     /**
      * Constructor.
      *
-     * @param string          $language POSIX locale definition
-     * @param string          $domain   Localization domain
-     * @param LoggerInterface $logger   Shared instance of a logger class
+     * @param string          $language         POSIX locale definition
+     * @param string          $domain           Localization domain
+     * @param LoggerInterface $logger           Shared instance of a logger class
+     * @param string          $locales_location Location of translation files
      */
-    public function __construct($language, $domain, $logger)
+    public function __construct($language, $domain, $logger, $locales_location)
     {
+        parent::__construct($logger, $locales_location);
+
         $this->language = $language;
         $this->domain   = $domain;
-        $this->logger   = $logger;
-
-        $this->default_language = 'en_US';
-        $this->locales_location = dirname($_SERVER['PHP_SELF']) . '/l10n';
     }
 
     /**
@@ -58,10 +55,9 @@ abstract class L10nProvider
     public function __destruct()
     {
         unset($this->language);
-        unset($this->default_language);
-        unset($this->locales_location);
         unset($this->domain);
-        unset($this->logger);
+
+        parent::__destruct();
     }
 
     /**

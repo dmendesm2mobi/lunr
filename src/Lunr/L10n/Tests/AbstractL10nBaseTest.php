@@ -1,7 +1,7 @@
 <?php
 
 /**
- * This file contains the L10nTraitBaseTest class.
+ * This file contains the AbstractL10nBaseTest class.
  *
  * SPDX-FileCopyrightText: Copyright 2012 M2mobi B.V., Amsterdam, The Netherlands
  * SPDX-FileCopyrightText: Copyright 2022 Move Agency Group B.V., Zwolle, The Netherlands
@@ -10,18 +10,39 @@
 
 namespace Lunr\L10n\Tests;
 
+use Lunr\Halo\PropertyTraits\PsrLoggerTestTrait;
+use Throwable;
+
 /**
  * This class contains test methods for the L10n class.
  *
- * @covers Lunr\L10n\L10nTrait
+ * @covers Lunr\L10n\AbstractL10n
  */
-class L10nTraitBaseTest extends L10nTraitTest
+class AbstractL10nBaseTest extends AbstractL10nTest
 {
+
+    use PsrLoggerTestTrait;
+
+    /**
+     * Test that the language is correctly stored in the object.
+     */
+    public function testDefaultLanguageSetCorrectly(): void
+    {
+        $this->assertPropertyEquals('default_language', 'en_US');
+    }
+
+    /**
+     * Test that the language is correctly stored in the object.
+     */
+    public function testLocaleLocationSetCorrectly(): void
+    {
+        $this->assertPropertyEquals('locales_location', TEST_STATICS . '/l10n/');
+    }
 
     /**
      * Test that setting a valid default language stores it in the object.
      *
-     * @covers Lunr\L10n\L10nTrait::set_default_language
+     * @covers Lunr\L10n\AbstractL10n::set_default_language
      */
     public function testSetValidDefaultLanguage(): void
     {
@@ -33,7 +54,7 @@ class L10nTraitBaseTest extends L10nTraitTest
     /**
      * Test that setting an invalid default language doesn't store it in the object.
      *
-     * @covers Lunr\L10n\L10nTrait::set_default_language
+     * @covers Lunr\L10n\AbstractL10n::set_default_language
      */
     public function testSetInvalidDefaultLanguage(): void
     {
@@ -43,13 +64,13 @@ class L10nTraitBaseTest extends L10nTraitTest
 
         $this->class->set_default_language('Whatever');
 
-        $this->assertNull($this->get_reflection_property_value('default_language'));
+        $this->assertEquals('en_US', $this->get_reflection_property_value('default_language'));
     }
 
     /**
      * Test that setting a valid default language doesn't alter the currently set locale.
      *
-     * @covers Lunr\L10n\L10nTrait::set_default_language
+     * @covers Lunr\L10n\AbstractL10n::set_default_language
      */
     public function testSetValidDefaultLanguageDoesNotAlterCurrentLocale(): void
     {
@@ -63,7 +84,7 @@ class L10nTraitBaseTest extends L10nTraitTest
     /**
      * Test that setting an invalid default language doesn't alter the currently set locale.
      *
-     * @covers Lunr\L10n\L10nTrait::set_default_language
+     * @covers Lunr\L10n\AbstractL10n::set_default_language
      */
     public function testSetInvalidDefaultLanguageDoesNotAlterCurrentLocale(): void
     {
@@ -81,7 +102,7 @@ class L10nTraitBaseTest extends L10nTraitTest
     /**
      * Test that setting a valid locales location stores it in the object.
      *
-     * @covers Lunr\L10n\L10nTrait::set_locales_location
+     * @covers Lunr\L10n\AbstractL10n::set_locales_location
      */
     public function testSetValidLocalesLocation(): void
     {
@@ -95,19 +116,25 @@ class L10nTraitBaseTest extends L10nTraitTest
     /**
      * Test that setting an invalid locales location doesn't store it in the object.
      *
-     * @covers Lunr\L10n\L10nTrait::set_locales_location
+     * @covers Lunr\L10n\AbstractL10n::set_locales_location
      */
     public function testSetInvalidLocalesLocation(): void
     {
         $location = TEST_STATICS . '/../l10n';
 
-        $this->logger->expects($this->once())
-                     ->method('warning')
-                     ->with('Invalid locales location: ' . $location);
+        $this->expectException('UnexpectedValueException');
+        $this->expectExceptionMessage('Failed to open directory');
 
-        $this->class->set_locales_location($location);
+        try
+        {
+            $this->class->set_locales_location($location);
+        }
+        catch (Throwable $e)
+        {
+            $this->assertEquals(TEST_STATICS . '/l10n/', $this->get_reflection_property_value('locales_location'));
 
-        $this->assertNull($this->get_reflection_property_value('locales_location'));
+            throw $e;
+        }
     }
 
 }

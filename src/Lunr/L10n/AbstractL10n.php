@@ -14,11 +14,12 @@
 namespace Lunr\L10n;
 
 use Psr\Log\LoggerInterface;
+use DirectoryIterator;
 
 /**
  * Localization support trait.
  */
-trait L10nTrait
+abstract class AbstractL10n
 {
 
     /**
@@ -31,13 +32,44 @@ trait L10nTrait
      * Locales location.
      * @var string
      */
-    protected $locales_location;
+    protected string $locales_location;
+
+    /**
+     * Locales location iterator.
+     * @var DirectoryIterator
+     */
+    protected DirectoryIterator $locales_iterator;
 
     /**
      * Shared instance of a Logger class.
      * @var LoggerInterface
      */
     protected $logger;
+
+    /**
+     * Constructor.
+     *
+     * @param LoggerInterface $logger           Shared instance of a Logger class.
+     * @param string          $locales_location Location of translation files
+     */
+    public function __construct($logger, $locales_location)
+    {
+        $this->logger = $logger;
+
+        $this->default_language = 'en_US';
+
+        $this->set_locales_location($locales_location);
+    }
+
+    /**
+     * Destructor.
+     */
+    public function __destruct()
+    {
+        unset($this->logger);
+        unset($this->default_language);
+        unset($this->locales_location);
+    }
 
     /**
      * Set the default language.
@@ -70,14 +102,11 @@ trait L10nTrait
      */
     public function set_locales_location($location)
     {
-        if (file_exists($location) === TRUE)
-        {
-            $this->locales_location = $location;
-        }
-        else
-        {
-            $this->logger->warning('Invalid locales location: ' . $location);
-        }
+        // This will throw if $location does not exist, isn't a directory
+        // or we don't have permission to access it.
+        $this->locales_iterator = new DirectoryIterator($location);
+
+        $this->locales_location = $location;
     }
 
 }
